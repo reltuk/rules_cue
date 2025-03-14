@@ -14,7 +14,7 @@ gazelle_binary(
 
 # gazelle:prefix github.com/tnarg/rules_cue
 gazelle(
-    name = "gazelle",
+    name = "gazelle_run",
     gazelle = "//:gazelle_binary",
 )
 

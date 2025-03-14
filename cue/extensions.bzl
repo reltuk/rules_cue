@@ -1,5 +1,6 @@
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+_runtime = tag_class(attrs = {"version": attr.string()})
 
 _cue_runtimes = {
     "0.6.0": [
@@ -223,12 +224,16 @@ _cue_runtimes = {
     ],
 }
 
-def cue_register_toolchains(version = "0.6.0"):
+def _runtime_impl(ctx):
+    version = "0.6.0"
+    for mod in ctx.modules:
+        for tag in mod.tags.runtime:
+            if tag.version:
+                version = tag.version
     for platform in _cue_runtimes[version]:
         suffix = "tar.gz"
         if platform["os"] == "Windows":
             suffix = "zip"
-
         url = "https://github.com/cuelang/cue/releases/download/v%s/cue_%s_%s_%s.%s" % (version, version, platform["os"], platform["arch"], suffix)
         if "url" in platform:
             url = platform["url"]
@@ -238,3 +243,8 @@ def cue_register_toolchains(version = "0.6.0"):
             url = url,
             sha256 = platform["sha256"],
         )
+
+runtime = module_extension(
+    implementation = _runtime_impl,
+    tag_classes = {"runtime": _runtime},
+)
